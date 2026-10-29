@@ -2,12 +2,12 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>原神 全キャラ名前当てクイズ｜120人言えるかな？【無料】</title>
-<meta name="description" content="原神のキャラクター120人の名前を何人当てられる？炎・水・風・雷・草・氷・岩の元素別に挑戦する無料のキャラ当てクイズ。武器種・実装時期のヒント、正答率、結果カードにも対応。非公式ファン制作。">
+<title>原神 全キャラ名前当てクイズ｜120人言えるかな？</title>
+<meta name="description" content="原神のキャラクター120人の名前を何人当てられる？炎・水・風・雷・草・氷・岩の元素別に挑戦するキャラ当てクイズ。武器種・実装時期のヒント、正答率、結果カードにも対応。非公式ファン制作。">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="ja_JP">
 <meta property="og:title" content="原神 全キャラ名前当てクイズ｜120人言えるかな？">
-<meta property="og:description" content="原神のキャラクター120人の名前を当てる無料クイズ。元素別に挑戦！ヒント・正答率・結果カード付き。">
+<meta property="og:description" content="原神のキャラクター120人の名前を当てるクイズ。元素別に挑戦！ヒント・正答率・結果カード付き。">
 <meta property="og:url" content="https://h7fgz669rc-debug.github.io/genshin-quiz/">
 <meta property="og:image" content="https://h7fgz669rc-debug.github.io/genshin-quiz/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -59,6 +59,7 @@ footer{text-align:center;color:#8b8c85;font:11px -apple-system,sans-serif;margin
 @media(min-width:550px){.grid{grid-template-columns:repeat(9,minmax(0,1fr));gap:7px}}
 @media(min-width:760px){.grid{grid-template-columns:repeat(12,minmax(0,1fr))}}
 
+
 /* V31: independent hint cards */
 .hint-answer{background:#f5f0e5;border:1px solid #c7baa4;border-radius:4px;padding:9px 12px;margin:7px 0;color:#263a46;font-size:13px}
 /* V28 additions: original roster and portrait styling remain unchanged */
@@ -109,8 +110,14 @@ let saved={};
 try{saved=JSON.parse(localStorage.getItem(saveKey)||'{}')||{};}catch(e){}
 if(Array.isArray(saved.solved))saved.solved.forEach(i=>{if(Number.isInteger(i)&&i>=0&&i<characters.length)solved.add(i);});
 let elapsedBefore=Number.isFinite(saved.elapsed)&&saved.elapsed>=0?saved.elapsed:0;
-const started=Date.now();
-function elapsed(){return elapsedBefore+(ended?0:Date.now()-started);}
+let started=0;
+let running=false;
+function elapsed(){return elapsedBefore+(running?Date.now()-started:0);}
+function startTimer(){
+ if(ended||running)return;
+ started=Date.now();running=true;
+ saveProgress();
+}
 function clockText(ms){const sec=Math.floor(ms/1000);return String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0');}
 function saveProgress(){try{localStorage.setItem(saveKey,JSON.stringify({solved:[...solved],ended,elapsed:elapsed(),hints:{weapon:[...hintSeen.weapon],period:[...hintSeen.period]},endReason:typeof endReason==='undefined'?'':endReason}));}catch(e){}}
 
@@ -238,10 +245,11 @@ el('copy').addEventListener('click',async()=>{
  catch(e){el('message').textContent='URLをコピーできませんでした。';}
 });
 function update(){el('count').textContent=`${solved.size} / ${characters.length}`;el('remain').textContent=`残り ${characters.length-solved.size}`;}
-function finish(){elapsedBefore=elapsed();ended=true;el('answer').disabled=true;el('submit').disabled=true;el('giveup').disabled=true;saveProgress();}
+function finish(){elapsedBefore=elapsed();running=false;ended=true;el('answer').disabled=true;el('submit').disabled=true;el('giveup').disabled=true;saveProgress();}
 el('form').addEventListener('submit',event=>{
  event.preventDefault();if(ended)return;
  const value=normalize(el('answer').value);if(!value)return;
+ if(!running)startTimer();
  const i=characters.findIndex(c=>normalize(c.name)===value||(c.reading&&normalize(c.reading)===value));
  if(i<0){el('message').textContent='未登録または不正解です。';return;}
  if(solved.has(i)){el('message').textContent='そのキャラは回答済みです。';el('answer').value='';return;}
@@ -259,13 +267,24 @@ if(saved.ended){endReason=saved.endReason||'giveup';
  for(let i=0;i<characters.length;i++)if(!solved.has(i))reveal(i,'revealed');
  ended=true;el('answer').disabled=true;el('submit').disabled=true;el('giveup').disabled=true;
  el('message').textContent='前回終了した結果を表示しています。';
-}else if(solved.size){el('message').textContent='前回の続きから再開しました。';}
+}else if(solved.size||elapsedBefore>0){el('message').textContent='前回の続きです。次の回答からタイマーが再開します。';}
 el('clock').textContent=clockText(elapsed());
-setInterval(()=>{if(!ended){el('clock').textContent=clockText(elapsed());saveProgress();}},1000);
+setInterval(()=>{if(running){el('clock').textContent=clockText(elapsed());saveProgress();}},1000);
 el('restart').addEventListener('click',()=>{
  if(!confirm('回答と経過時間を消して最初からやり直しますか？'))return;
- try{localStorage.removeItem(saveKey);}catch(e){}
- location.reload();
+ // Reset in place: no reload, so a cached page cannot restore old timer state.
+ running=false;ended=false;endReason='';elapsedBefore=0;started=0;
+ solved.clear();hintSeen.weapon.clear();hintSeen.period.clear();
+ selectedHintIndex=-1;showOnlyUnsolved=false;
+ tiles.forEach(tile=>{tile.classList.remove('done','revealed','selected','hidden-unsolved');});
+ extra('filterToggle').classList.remove('active');
+ ['hintPanel','statsPanel','resultPanel'].forEach(id=>{extra(id).hidden=true;});
+ ['weaponOutput','periodOutput'].forEach(id=>{extra(id).hidden=true;});
+ extra('hintOutput').textContent='マスを選び、見たいヒントだけ開いてね。';
+ el('answer').disabled=false;el('submit').disabled=false;el('giveup').disabled=false;
+ el('answer').value='';el('clock').textContent='00:00';
+ el('message').textContent='最初の回答を送信すると計測が始まります。';
+ update();saveProgress();renderStats();
 });
 update();
 
