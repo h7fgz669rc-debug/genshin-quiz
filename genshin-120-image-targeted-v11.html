@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>原神 全キャラ言えるかな？｜120キャラ・検証</title>
+<style>
+:root{--ink:#263a46;--gold:#b49b68;--paper:#f5f0e5}
+*{box-sizing:border-box}
+body{margin:0;background:#e6e3da;color:var(--ink);font-family:Georgia,"Yu Mincho","Hiragino Mincho ProN",serif}
+main{max-width:920px;margin:auto;padding:22px 12px 60px}
+header{text-align:center;padding:16px 8px 18px;border-bottom:1px solid #bfb6a2}
+.eyebrow{font-size:10px;letter-spacing:.35em;color:#8e7a57}
+h1{font-size:clamp(23px,5vw,34px);font-weight:700;margin:9px 0}
+.subtitle{font-family:-apple-system,"Hiragino Kaku Gothic ProN",sans-serif;font-size:11px;color:#78818a}
+.panel{background:var(--paper);border:1px solid #d0c5ae;box-shadow:0 4px 20px #263a4610;padding:14px;margin-top:18px}
+.panel-top{display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid #d7ccba;padding-bottom:10px;margin-bottom:12px}
+.panel-title{font-size:13px;font-weight:700;letter-spacing:.1em}.stats{font-family:-apple-system,sans-serif;font-size:12px;display:flex;gap:12px;flex-wrap:wrap}
+#count{color:#987c49;font-weight:700}
+form{display:flex;gap:8px}
+input{min-width:0;flex:1;padding:12px 10px;background:#fffefa;border:1px solid #b9b09e;color:var(--ink);font-size:16px;border-radius:2px}
+button{border:1px solid #314e60;background:#314e60;color:#fff;padding:10px 17px;font-size:13px;cursor:pointer;border-radius:2px}
+button:disabled,input:disabled{opacity:.5}
+#giveup{background:transparent;color:#826e56;border:1px solid #c5b9a4;font-size:11px;padding:7px 11px}
+.bottom{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px}
+#message{font-family:-apple-system,sans-serif;font-size:12px;color:#68727b;min-height:18px}
+.catalog-heading{font-weight:700;display:flex;align-items:center;gap:12px;margin:22px 2px 12px;color:#74694f;font-size:13px;letter-spacing:.14em}
+.catalog-heading:after{content:"";height:1px;background:#bfb6a2;flex:1}
+.grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px}
+.tile{position:relative;aspect-ratio:1/1.10;min-width:0;border:2px solid var(--element);background:#2e4250;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.tile:before{content:"";position:absolute;inset:3px;border:1px solid #ffffff28;pointer-events:none;z-index:2}
+.number{position:absolute;top:5px;left:6px;color:#c4d0d3;font:9px Georgia,serif;z-index:3}
+.question{color:#e8e3d6;font:700 clamp(20px,4.5vw,32px) Georgia,serif}
+.tile.done{background:#f3e9d6}
+.tile.revealed{background:#cbd0cf}
+.tile .portrait{display:none;width:100%;height:77%;position:absolute;top:0;left:0;object-fit:cover;object-position:center top}
+.tile .name{display:none;position:absolute;bottom:0;left:0;width:100%;min-height:23%;padding:2px 1px;background:#f5f0e7;color:#263a46;text-align:center;font:600 clamp(8px,2vw,11px)/1.2 -apple-system,"Hiragino Kaku Gothic ProN",sans-serif;overflow-wrap:anywhere;align-content:center}
+.tile.done .portrait,.tile.done .name,.tile.revealed .name,.tile.revealed .portrait{display:block}
+.tile.done .question,.tile.revealed .question{display:none}
+.tile.revealed .name{background:#d9d9d5}
+.tile .portrait.failed{display:none}
+.legend{display:flex;flex-wrap:wrap;gap:8px 14px;margin:17px 2px;color:#65717b;font:11px -apple-system,sans-serif}
+.dot{display:inline-block;width:9px;height:9px;background:var(--color);margin-right:4px;border-radius:50%}
+footer{text-align:center;color:#8b8c85;font:11px -apple-system,sans-serif;margin-top:22px;line-height:1.7}
+@media(min-width:550px){.grid{grid-template-columns:repeat(9,minmax(0,1fr));gap:7px}}
+@media(min-width:760px){.grid{grid-template-columns:repeat(12,minmax(0,1fr))}}
+</style>
+</head>
+<body><main>
+<header><div class="eyebrow">CHARACTER ARCHIVE</div><h1>原神 全キャラ言えるかな？</h1><div class="subtitle">120キャラ・検証版｜旅人を除く／収録内容は確認中</div></header>
+<section class="panel">
+<div class="panel-top"><span class="panel-title">記憶の記録</span><div class="stats"><span id="count">0 / 120</span><span id="clock">00:00</span><span id="remain">残り 120</span></div></div>
+<form id="form"><input id="answer" autocomplete="off" placeholder="キャラクター名を入力" aria-label="キャラクター名"><button id="submit" type="submit">回答</button></form>
+<div class="bottom"><span id="message" aria-live="polite">正式名・登録済みのひらがな読みで回答できます。</span><button id="giveup" type="button">ギブアップ</button></div>
+</section>
+<div class="catalog-heading">CHARACTER COLLECTION</div><p style="font:11px -apple-system,sans-serif;color:#79694f;line-height:1.6">※2026年10月時点の収録候補120人。画像提供元の更新状況によっては画像が表示されない場合があります。読みが未登録のキャラは正式名（カタカナはひらがなでも可）で回答してください。</p>
+<div id="grid" class="grid"></div>
+<div id="legend" class="legend"></div>
+<footer>非公式ファン制作・デザイン検証用ページ<br>2026年10月29日時点の収録候補120人。画像は複数の配信元を順番に試み、未提供の場合は名前で表示します。</footer>
+</main>
+<script>
+'use strict';
+const colors={炎:'#c9674d',水:'#4b9cc6',風:'#55a994',雷:'#9871b7',草:'#8fa957',氷:'#78b9c7',岩:'#b99b57'};
+const characters=[{"name":"アンバー","element":"炎","reading":"あんばー","slug":"amber"},{"name":"ベネット","element":"炎","reading":"べねっと","slug":"bennett"},{"name":"ディルック","element":"炎","reading":"でぃるっく","slug":"diluc"},{"name":"香菱","element":"炎","reading":"しゃんりん","slug":"xiangling"},{"name":"クレー","element":"炎","reading":"くれー","slug":"klee"},{"name":"辛炎","element":"炎","reading":"しんえん","slug":"xinyan"},{"name":"胡桃","element":"炎","reading":"ふーたお","slug":"hu-tao"},{"name":"煙緋","element":"炎","reading":"えんひ","slug":"yanfei"},{"name":"宵宮","element":"炎","reading":"よいみや","slug":"yoimiya"},{"name":"トーマ","element":"炎","reading":"とーま","slug":"thoma"},{"name":"ディシア","element":"炎","reading":"でぃしあ","slug":"dehya"},{"name":"リネ","element":"炎","reading":"りね","slug":"lyney"},{"name":"シュヴルーズ","element":"炎","reading":"しゅゔるーず","slug":"chevreuse"},{"name":"嘉明","element":"炎","reading":"がみん","slug":"gaming"},{"name":"アルレッキーノ","element":"炎","reading":"あるれっきーの","slug":"arlecchino"},{"name":"マーヴィカ","element":"炎","reading":"まーゔぃか","slug":"mavuika"},{"name":"ドゥリン","element":"炎","reading":"どぅりん","slug":""},{"name":"ニコ","element":"炎","reading":"にこ","slug":""},{"name":"バーバラ","element":"水","reading":"ばーばら","slug":"barbara"},{"name":"モナ","element":"水","reading":"もな","slug":"mona"},{"name":"行秋","element":"水","reading":"ゆくあき","slug":"xingqiu"},{"name":"タルタリヤ","element":"水","reading":"たるたりや","slug":"tartaglia"},{"name":"珊瑚宮心海","element":"水","reading":"さんごのみやここみ","slug":"sangonomiya-kokomi"},{"name":"神里綾人","element":"水","reading":"かみさとあやと","slug":"kamisato-ayato"},{"name":"夜蘭","element":"水","reading":"いぇらん","slug":"yelan"},{"name":"キャンディス","element":"水","reading":"きゃんでぃす","slug":"candace"},{"name":"ニィロウ","element":"水","reading":"にぃろう","slug":"nilou"},{"name":"ヌヴィレット","element":"水","reading":"ぬゔぃれっと","slug":"neuvillette"},{"name":"フリーナ","element":"水","reading":"ふりーな","slug":"furina"},{"name":"シグウィン","element":"水","reading":"しぐうぃん","slug":"sigewinne"},{"name":"ムアラニ","element":"水","reading":"むあらに","slug":"mualani"},{"name":"ダリア","element":"水","reading":"だりあ","slug":"dahlia"},{"name":"アイノ","element":"水","reading":"あいの","slug":"aino"},{"name":"コロンビーナ","element":"水","reading":"ころんびーな","slug":""},{"name":"ヴォジャニーツァ","element":"水","reading":"ゔぉじゃにーつぁ","slug":""},{"name":"ジン","element":"風","reading":"じん","slug":"jean"},{"name":"スクロース","element":"風","reading":"すくろーす","slug":"sucrose"},{"name":"ウェンティ","element":"風","reading":"うぇんてぃ","slug":"venti"},{"name":"魈","element":"風","reading":"しょう","slug":"xiao"},{"name":"楓原万葉","element":"風","reading":"かえではらかずは","slug":"kaedehara-kazuha"},{"name":"早柚","element":"風","reading":"さゆ","slug":"sayu"},{"name":"鹿野院平蔵","element":"風","reading":"しかのいんへいぞう","slug":"shikanoin-heizou"},{"name":"ファルザン","element":"風","reading":"ふぁるざん","slug":"faruzan"},{"name":"放浪者","element":"風","reading":"ほうろうしゃ","slug":"wanderer"},{"name":"リネット","element":"風","reading":"りねっと","slug":"lynette"},{"name":"閑雲","element":"風","reading":"かんうん","slug":"xianyun"},{"name":"チャスカ","element":"風","reading":"ちゃすか","slug":"chasca"},{"name":"藍硯","element":"風","reading":"らんやん","slug":"lan-yan"},{"name":"夢見月瑞希","element":"風","reading":"ゆめみづきみずき","slug":"yumemizuki-mizuki"},{"name":"イファ","element":"風","reading":"いふぁ","slug":"ifa"},{"name":"ヤフォダ","element":"風","reading":"やふぉだ","slug":""},{"name":"ファルカ","element":"風","reading":"ふぁるか","slug":""},{"name":"プルーネ","element":"風","reading":"ぷるーね","slug":""},{"name":"ヴェスナ","element":"風","reading":"ゔぇすな","slug":""},{"name":"北斗","element":"雷","reading":"ほくと","slug":"beidou"},{"name":"フィッシュル","element":"雷","reading":"ふぃっしゅる","slug":"fischl"},{"name":"刻晴","element":"雷","reading":"こくせい","slug":"keqing"},{"name":"リサ","element":"雷","reading":"りさ","slug":"lisa"},{"name":"レザー","element":"雷","reading":"れざー","slug":"razor"},{"name":"九条裟羅","element":"雷","reading":"くじょうさら","slug":"kujou-sara"},{"name":"雷電将軍","element":"雷","reading":"らいでんしょうぐん","slug":"raiden-shogun"},{"name":"八重神子","element":"雷","reading":"やえみこ","slug":"yae-miko"},{"name":"久岐忍","element":"雷","reading":"くきしのぶ","slug":"kuki-shinobu"},{"name":"ドリー","element":"雷","reading":"どりー","slug":"dori"},{"name":"セノ","element":"雷","reading":"せの","slug":"cyno"},{"name":"クロリンデ","element":"雷","reading":"くろりんで","slug":"clorinde"},{"name":"セトス","element":"雷","reading":"せとす","slug":"sethos"},{"name":"オロルン","element":"雷","reading":"おろるん","slug":"ororon"},{"name":"イアンサ","element":"雷","reading":"いあんさ","slug":"iansan"},{"name":"ヴァレサ","element":"雷","reading":"ゔぁれさ","slug":"varesa"},{"name":"イネファ","element":"雷","reading":"いねふぁ","slug":"ineffa"},{"name":"フリンズ","element":"雷","reading":"ふりんず","slug":"flins"},{"name":"アリョーシャ","element":"雷","reading":"ありょーしゃ","slug":""},{"name":"コレイ","element":"草","reading":"これい","slug":"collei"},{"name":"ティナリ","element":"草","reading":"てぃなり","slug":"tighnari"},{"name":"ナヒーダ","element":"草","reading":"なひーだ","slug":"nahida"},{"name":"アルハイゼン","element":"草","reading":"あるはいぜん","slug":"alhaitham"},{"name":"ヨォーヨ","element":"草","reading":"よぉーよ","slug":"yaoyao"},{"name":"白朮","element":"草","reading":"びゃくじゅつ","slug":"baizhu"},{"name":"カーヴェ","element":"草","reading":"かーゔぇ","slug":"kaveh"},{"name":"綺良々","element":"草","reading":"きらら","slug":"kirara"},{"name":"エミリエ","element":"草","reading":"えみりえ","slug":"emilie"},{"name":"キィニチ","element":"草","reading":"きぃにち","slug":"kinich"},{"name":"ラウマ","element":"草","reading":"らうま","slug":"lauma"},{"name":"ネフェル","element":"草","reading":"ねふぇる","slug":"nefer"},{"name":"重雲","element":"氷","reading":"ちょううん","slug":"chongyun"},{"name":"ガイア","element":"氷","reading":"がいあ","slug":"kaeya"},{"name":"七七","element":"氷","reading":"なな","slug":"qiqi"},{"name":"ディオナ","element":"氷","reading":"でぃおな","slug":"diona"},{"name":"甘雨","element":"氷","reading":"かんう","slug":"ganyu"},{"name":"ロサリア","element":"氷","reading":"ろさりあ","slug":"rosaria"},{"name":"エウルア","element":"氷","reading":"えうるあ","slug":"eula"},{"name":"神里綾華","element":"氷","reading":"かみさとあやか","slug":"kamisato-ayaka"},{"name":"アーロイ","element":"氷","reading":"あーろい","slug":"aloy"},{"name":"申鶴","element":"氷","reading":"しんかく","slug":"shenhe"},{"name":"レイラ","element":"氷","reading":"れいら","slug":"layla"},{"name":"ミカ","element":"氷","reading":"みか","slug":"mika"},{"name":"フレミネ","element":"氷","reading":"ふれみね","slug":"freminet"},{"name":"リオセスリ","element":"氷","reading":"りおせすり","slug":"wriothesley"},{"name":"シャルロット","element":"氷","reading":"しゃるろっと","slug":"charlotte"},{"name":"シトラリ","element":"氷","reading":"しとらり","slug":"citlali"},{"name":"エスコフィエ","element":"氷","reading":"えすこふぃえ","slug":"escoffier"},{"name":"スカーク","element":"氷","reading":"すかーく","slug":"skirk"},{"name":"ローエン","element":"氷","reading":"ろーえん","slug":""},{"name":"サンドローネ","element":"氷","reading":"さんどろーね","slug":""},{"name":"オデット","element":"氷","reading":"おでっと","slug":""},{"name":"凝光","element":"岩","reading":"ぎょうこう","slug":"ningguang"},{"name":"ノエル","element":"岩","reading":"のえる","slug":"noelle"},{"name":"鍾離","element":"岩","reading":"しょうり","slug":"zhongli"},{"name":"アルベド","element":"岩","reading":"あるべど","slug":"albedo"},{"name":"荒瀧一斗","element":"岩","reading":"あらたきいっと","slug":"arataki-itto"},{"name":"ゴロー","element":"岩","reading":"ごろー","slug":"gorou"},{"name":"雲菫","element":"岩","reading":"うんきん","slug":"yun-jin"},{"name":"ナヴィア","element":"岩","reading":"なゔぃあ","slug":"navia"},{"name":"千織","element":"岩","reading":"ちおり","slug":"chiori"},{"name":"カチーナ","element":"岩","reading":"かちーな","slug":"kachina"},{"name":"シロネン","element":"岩","reading":"しろねん","slug":"xilonen"},{"name":"イルーガ","element":"岩","reading":"いるーが","slug":""},{"name":"兹白","element":"岩","reading":"しはく","slug":""},{"name":"リンネア","element":"岩","reading":"りんねあ","slug":""}];
+const imageIconCandidates={"マーヴィカ":"Mavuika","スカーク":"Skirk","シトラリ":"Citlali","チャスカ":"Chasca","エスコフィエ":"Escoffier","ヴァレサ":"Varesa","イアンサ":"Iansan","キィニチ":"Kinich","カチーナ":"Kachina","シロネン":"Xilonen","ムアラニ":"Mualani","オロルン":"Olorun","イファ":"Ifa","ラウマ":"Lauma","ネフェル":"Nefer","フリンズ":"Flins","イネファ":"Ineffa","アイノ":"Aino","ダリア":"Dahlia","ドゥリン":"Durin","ファルカ":"Varka","コロンビーナ":"Columbina","ヴォジャニーツァ":"Vodyanitsa","リンネア":"Linnea","イルーガ":"Illuga","ヤフォダ":"Jahoda","ローエン":"Lohen","サンドローネ":"Sandrone","オデット":"Odette","アリョーシャ":"Alyosha","プルーネ":"Prune","ヴェスナ":"Vesna"};
+const wikiIconNames={"マーヴィカ":"Mavuika","スカーク":"Skirk","シトラリ":"Citlali","チャスカ":"Chasca","エスコフィエ":"Escoffier","ヴァレサ":"Varesa","イアンサ":"Iansan","キィニチ":"Kinich","カチーナ":"Kachina","シロネン":"Xilonen","ムアラニ":"Mualani","オロルン":"Ororon","イファ":"Ifa","ラウマ":"Lauma","ネフェル":"Nefer","フリンズ":"Flins","イネファ":"Ineffa","アイノ":"Aino","ダリア":"Dahlia","ドゥリン":"Durin","ニコ":"Nicole","ファルカ":"Varka","コロンビーナ":"Columbina","ヴォジャニーツァ":"Vodyanitsa","リンネア":"Linnea","イルーガ":"Illuga","兹白":"Zibai","ヤフォダ":"Jahoda","ローエン":"Lohen","サンドローネ":"Sandrone","オデット":"Odette","アリョーシャ":"Alyosha","プルーネ":"Prune","ヴェスナ":"Vesna"};
+// Targeted image fallback: exact character icon filenames checked against the Wiki icon index.
+// Only characters missing portraits in the user's Ver.10 screenshots are overridden.
+const missingPortraitWikiNames={
+ "ドゥリン":"Durin", "ニコ":"Nicole", "珊瑚宮心海":"Sangonomiya Kokomi",
+ "神里綾人":"Kamisato Ayato", "楓原万葉":"Kaedehara Kazuha",
+ "藍硯":"Lan Yan", "夢見月瑞希":"Yumemizuki Mizuki",
+ "九条裟羅":"Kujou Sara", "雷電将軍":"Raiden Shogun",
+ "神里綾華":"Kamisato Ayaka", "スカーク":"Skirk",
+ "サンドローネ":"Sandrone", "兹白":"Zibai"
+};
+const el=id=>document.getElementById(id);
+const grid=el('grid');
+const tiles=[];
+const solved=new Set();
+let ended=false;
+const started=Date.now();
+const normalize=s=>s.normalize('NFKC').trim().replace(/\s+/g,'').toLowerCase().replace(/[ァ-ヶ]/g,ch=>String.fromCharCode(ch.charCodeAt(0)-96));
+characters.forEach((c,i)=>{
+ const tile=document.createElement('div');
+ tile.className='tile';tile.style.setProperty('--element',colors[c.element]);
+ const number=document.createElement('span');number.className='number';number.textContent=String(i+1).padStart(3,'0');
+ const question=document.createElement('span');question.className='question';question.textContent='?';
+ const portrait=document.createElement('img');portrait.className='portrait';portrait.alt='';portrait.loading='lazy';
+ portrait.onerror=()=>{
+  const next=Number(portrait.dataset.sourceIndex||'0')+1;
+  const sources=JSON.parse(portrait.dataset.sources||'[]');
+  if(next<sources.length){portrait.dataset.sourceIndex=String(next);portrait.src=sources[next];}
+  else {portrait.classList.add('failed');portrait.removeAttribute('src');}
+ };
+ const name=document.createElement('span');name.className='name';name.textContent=c.name;
+ tile.append(number,question,portrait,name);grid.appendChild(tile);tiles.push(tile);
+});
+el('legend').innerHTML=Object.entries(colors).map(([e,color])=>`<span><i class="dot" style="--color:${color}"></i>${e}</span>`).join('');
+function reveal(i,cls){
+ tiles[i].classList.add(cls);
+ const img=tiles[i].querySelector('img');
+ const c=characters[i];
+ const sources=[];
+ // Try the exact Wiki file title FIRST for the 13 missing portraits.
+ // These are candidates, not confirmed working image responses.
+ const targetedName=missingPortraitWikiNames[c.name];
+ if(targetedName){
+  sources.push(`https://genshin-impact.fandom.com/wiki/Special:FilePath/${encodeURIComponent(targetedName+' Icon.png')}`);
+ }
+ // Newer-character candidate assets use game-internal filenames; fall back to older API.
+ const icon=imageIconCandidates[c.name];
+ if(icon){
+  sources.push(`https://static.nanoka.cc/gi/UI/UI_AvatarIcon_${icon}.webp`);
+  sources.push(`https://gi.yatta.moe/assets/UI/UI_AvatarIcon_${icon}.png`);
+  sources.push(`https://enka.network/ui/UI_AvatarIcon_${icon}.png`);
+ }
+ // Additional icon fallback for newer characters. A URL candidate is not proof the file exists.
+ const wikiName=wikiIconNames[c.name];
+ if(wikiName && !targetedName){
+  sources.push(`https://genshin-impact.fandom.com/wiki/Special:FilePath/${encodeURIComponent(wikiName+' Icon.png')}`);
+ }
+ if(c.slug){
+  const slug=encodeURIComponent(c.slug);
+  sources.push(`https://genshin.jmp.blue/characters/${slug}/icon`);
+  sources.push(`https://genshin.dev/api/characters/${slug}/icon`);
+  sources.push(`https://genshin.jmp.blue/characters/${slug}/icon-big`);
+  if(!wikiName){
+   const wikiFromSlug=c.slug.split('-').map(w=>w[0].toUpperCase()+w.slice(1)).join(' ');
+   sources.push(`https://genshin-impact.fandom.com/wiki/Special:FilePath/${encodeURIComponent(wikiFromSlug+' Icon.png')}`);
+  }
+ }
+ if(sources.length){
+  img.dataset.sources=JSON.stringify([...new Set(sources)]);
+  img.dataset.sourceIndex='0';
+  img.classList.remove('failed');
+  img.src=sources[0];
+ }else{
+  img.classList.add('failed');
+ }
+}
+function update(){el('count').textContent=`${solved.size} / ${characters.length}`;el('remain').textContent=`残り ${characters.length-solved.size}`;}
+function finish(){ended=true;el('answer').disabled=true;el('submit').disabled=true;el('giveup').disabled=true;}
+el('form').addEventListener('submit',event=>{
+ event.preventDefault();if(ended)return;
+ const value=normalize(el('answer').value);if(!value)return;
+ const i=characters.findIndex(c=>normalize(c.name)===value||(c.reading&&normalize(c.reading)===value));
+ if(i<0){el('message').textContent='未登録または不正解です。';return;}
+ if(solved.has(i)){el('message').textContent='そのキャラは回答済みです。';el('answer').value='';return;}
+ solved.add(i);reveal(i,'done');el('message').textContent=`正解：${characters[i].name}`;el('answer').value='';update();
+ if(solved.size===characters.length){finish();el('message').textContent='全問正解！';}
+});
+el('giveup').addEventListener('click',()=>{
+ if(ended||!confirm('ギブアップして未回答の名前を表示しますか？'))return;
+ characters.forEach((c,i)=>{if(!solved.has(i))reveal(i,'revealed');});
+ finish();el('message').textContent='終了しました。未回答の名前を表示しています。';
+});
+setInterval(()=>{
+ if(ended)return;const sec=Math.floor((Date.now()-started)/1000);
+ el('clock').textContent=String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0');
+},1000);
+update();
+</script></body></html>
