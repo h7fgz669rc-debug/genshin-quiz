@@ -1,0 +1,84 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>原神 全キャラ言えるかな？</title>
+<style>
+body {
+  background: #172d40;
+  color: #f5e9ce;
+  font-family: sans-serif;
+  text-align: center;
+}
+h1 { color: #e5c98f; }
+input, button {
+  padding: 12px;
+  margin: 5px;
+  font-size: 16px;
+}
+section {
+  border: 2px solid #c9ae76;
+  margin: 15px 8px;
+  padding: 12px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 7px;
+}
+.tile {
+  border: 2px solid #c9ae76;
+  padding: 18px 2px;
+  background: #263f53;
+  font-weight: bold;
+}
+</style>
+</head>
+<body>
+<h1>原神 全キャラ言えるかな？</h1>
+<input id="answer" placeholder="キャラ名">
+<button onclick="check()">回答</button>
+<button onclick="giveup()">ギブアップ</button>
+<p id="status">0 / 3</p>
+<section>
+<h2>岩元素 ★5</h2>
+<div class="grid" id="board"></div>
+</section>
+<script>
+const characters = [
+  {name:"兹白", reading:"しはく"},
+  {name:"鍾離", reading:"しょうり"},
+  {name:"ナヴィア", reading:"なゔぃあ"}
+];
+const found = new Set();
+
+function draw(showAll = false) {
+  document.getElementById("board").innerHTML =
+    characters.map((c, i) =>
+      '<div class="tile">' +
+      (showAll || found.has(i) ? c.name : '?') +
+      '</div>'
+    ).join("");
+  document.getElementById("status").textContent =
+    found.size + " / " + characters.length;
+}
+function check() {
+  const input = document.getElementById("answer");
+  const value = input.value.trim();
+  characters.forEach((c, i) => {
+    if (value === c.name || value === c.reading) {
+      found.add(i);
+    }
+  });
+  input.value = "";
+  draw();
+}
+function giveup() {
+  draw(true);
+}
+draw();
+</script>
+</body>
+</html>
