@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>原神 全キャラ言えるかな？｜図鑑デザイン試作</title>
+<style>
+:root{--ink:#263a46;--gold:#b49b68;--paper:#f5f0e5}
+*{box-sizing:border-box}
+body{margin:0;background:#e6e3da;color:var(--ink);font-family:Georgia,"Yu Mincho","Hiragino Mincho ProN",serif}
+main{max-width:920px;margin:auto;padding:22px 12px 60px}
+header{text-align:center;padding:16px 8px 18px;border-bottom:1px solid #bfb6a2}
+.eyebrow{font-size:10px;letter-spacing:.35em;color:#8e7a57}
+h1{font-size:clamp(23px,5vw,34px);font-weight:500;margin:9px 0}
+.subtitle{font-family:-apple-system,"Hiragino Kaku Gothic ProN",sans-serif;font-size:11px;color:#78818a}
+.panel{background:var(--paper);border:1px solid #d0c5ae;box-shadow:0 4px 20px #263a4610;padding:14px;margin-top:18px}
+.panel-top{display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid #d7ccba;padding-bottom:10px;margin-bottom:12px}
+.panel-title{font-size:13px;letter-spacing:.1em}.stats{font-family:-apple-system,sans-serif;font-size:12px;display:flex;gap:12px;flex-wrap:wrap}
+#count{color:#987c49;font-weight:700}
+form{display:flex;gap:8px}
+input{min-width:0;flex:1;padding:12px 10px;background:#fffefa;border:1px solid #b9b09e;color:var(--ink);font-size:16px;border-radius:2px}
+button{border:1px solid #314e60;background:#314e60;color:#fff;padding:10px 17px;font-size:13px;cursor:pointer;border-radius:2px}
+button:disabled,input:disabled{opacity:.5}
+#giveup{background:transparent;color:#826e56;border:1px solid #c5b9a4;font-size:11px;padding:7px 11px}
+.bottom{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px}
+#message{font-family:-apple-system,sans-serif;font-size:12px;color:#68727b;min-height:18px}
+.catalog-heading{display:flex;align-items:center;gap:12px;margin:22px 2px 12px;color:#74694f;font-size:13px;letter-spacing:.14em}
+.catalog-heading:after{content:"";height:1px;background:#bfb6a2;flex:1}
+.grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}
+.tile{position:relative;aspect-ratio:1/1.16;min-width:0;border:2px solid var(--element);background:#2e4250;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.tile:before{content:"";position:absolute;inset:3px;border:1px solid #ffffff28;pointer-events:none;z-index:2}
+.number{position:absolute;top:5px;left:6px;color:#c4d0d3;font:9px Georgia,serif;z-index:3}
+.question{color:#e8e3d6;font:normal clamp(23px,5vw,35px) Georgia,serif}
+.tile.done{background:#f3e9d6}
+.tile.revealed{background:#cbd0cf}
+.tile .portrait{display:none;width:100%;height:77%;position:absolute;top:0;left:0;object-fit:cover;object-position:center top}
+.tile .name{display:none;position:absolute;bottom:0;left:0;width:100%;min-height:23%;padding:4px 2px;background:#f5f0e7;color:#263a46;text-align:center;font:600 clamp(9px,2.3vw,12px)/1.3 -apple-system,"Hiragino Kaku Gothic ProN",sans-serif;overflow-wrap:anywhere;align-content:center}
+.tile.done .portrait,.tile.done .name,.tile.revealed .name{display:block}
+.tile.done .question,.tile.revealed .question{display:none}
+.tile.revealed .name{background:#d9d9d5}
+.tile .portrait.failed{display:none}
+.legend{display:flex;flex-wrap:wrap;gap:8px 14px;margin:17px 2px;color:#65717b;font:11px -apple-system,sans-serif}
+.dot{display:inline-block;width:9px;height:9px;background:var(--color);margin-right:4px;border-radius:50%}
+footer{text-align:center;color:#8b8c85;font:11px -apple-system,sans-serif;margin-top:22px;line-height:1.7}
+@media(min-width:550px){.grid{grid-template-columns:repeat(8,minmax(0,1fr));gap:9px}}
+@media(min-width:760px){.grid{grid-template-columns:repeat(10,minmax(0,1fr))}}
+</style>
+</head>
+<body><main>
+<header><div class="eyebrow">CHARACTER ARCHIVE</div><h1>原神 全キャラ言えるかな？</h1><div class="subtitle">図鑑デザイン試作版｜旅人を除く8キャラで動作確認</div></header>
+<section class="panel">
+<div class="panel-top"><span class="panel-title">記憶の記録</span><div class="stats"><span id="count">0 / 8</span><span id="clock">00:00</span><span id="remain">残り 8</span></div></div>
+<form id="form"><input id="answer" autocomplete="off" placeholder="キャラクター名を入力" aria-label="キャラクター名"><button id="submit" type="submit">回答</button></form>
+<div class="bottom"><span id="message" aria-live="polite">名前・ひらがなのどちらでも回答できます。</span><button id="giveup" type="button">ギブアップ</button></div>
+</section>
+<div class="catalog-heading">CHARACTER COLLECTION</div>
+<div id="grid" class="grid"></div>
+<div id="legend" class="legend"></div>
+<footer>非公式ファン制作・デザイン検証用ページ<br>キャラクター画像は外部のファンAPIから読み込みます。</footer>
+</main>
+<script>
+'use strict';
+const colors={炎:'#c9674d',水:'#4b9cc6',風:'#55a994',雷:'#9871b7',草:'#8fa957',氷:'#78b9c7',岩:'#b99b57'};
+const characters=[
+{name:'煙緋',reading:'えんひ',element:'炎',slug:'yanfei'},
+{name:'胡桃',reading:'ふーたお',element:'炎',slug:'hu-tao'},
+{name:'タルタリヤ',reading:'たるたりや',element:'水',slug:'tartaglia'},
+{name:'楓原万葉',reading:'かえではらかずは',element:'風',slug:'kaedehara-kazuha'},
+{name:'雷電将軍',reading:'らいでんしょうぐん',element:'雷',slug:'raiden-shogun'},
+{name:'ナヒーダ',reading:'なひーだ',element:'草',slug:'nahida'},
+{name:'神里綾華',reading:'かみさとあやか',element:'氷',slug:'kamisato-ayaka'},
+{name:'鍾離',reading:'しょうり',element:'岩',slug:'zhongli'}
+];
+const el=id=>document.getElementById(id);
+const grid=el('grid');
+const tiles=[];
+const solved=new Set();
+let ended=false;
+const started=Date.now();
+const normalize=s=>s.normalize('NFKC').trim().replace(/\s+/g,'').toLowerCase();
+characters.forEach((c,i)=>{
+ const tile=document.createElement('div');
+ tile.className='tile';tile.style.setProperty('--element',colors[c.element]);
+ const number=document.createElement('span');number.className='number';number.textContent=String(i+1).padStart(3,'0');
+ const question=document.createElement('span');question.className='question';question.textContent='?';
+ const portrait=document.createElement('img');portrait.className='portrait';portrait.alt='';portrait.loading='lazy';
+ portrait.onerror=()=>portrait.classList.add('failed');
+ const name=document.createElement('span');name.className='name';name.textContent=c.name;
+ tile.append(number,question,portrait,name);grid.appendChild(tile);tiles.push(tile);
+});
+el('legend').innerHTML=Object.entries(colors).map(([e,color])=>`<span><i class="dot" style="--color:${color}"></i>${e}</span>`).join('');
+function reveal(i,cls){
+ tiles[i].classList.add(cls);
+ if(cls==='done'){
+  const img=tiles[i].querySelector('img');
+  img.src=`https://genshin.jmp.blue/characters/${characters[i].slug}/icon`;
+ }
+}
+function update(){el('count').textContent=`${solved.size} / ${characters.length}`;el('remain').textContent=`残り ${characters.length-solved.size}`;}
+function finish(){ended=true;el('answer').disabled=true;el('submit').disabled=true;el('giveup').disabled=true;}
+el('form').addEventListener('submit',event=>{
+ event.preventDefault();if(ended)return;
+ const value=normalize(el('answer').value);if(!value)return;
+ const i=characters.findIndex(c=>normalize(c.name)===value||normalize(c.reading)===value);
+ if(i<0){el('message').textContent='未登録または不正解です。';return;}
+ if(solved.has(i)){el('message').textContent='そのキャラは回答済みです。';el('answer').value='';return;}
+ solved.add(i);reveal(i,'done');el('message').textContent=`正解：${characters[i].name}`;el('answer').value='';update();
+ if(solved.size===characters.length){finish();el('message').textContent='全問正解！';}
+});
+el('giveup').addEventListener('click',()=>{
+ if(ended||!confirm('ギブアップして未回答の名前を表示しますか？'))return;
+ characters.forEach((c,i)=>{if(!solved.has(i))reveal(i,'revealed');});
+ finish();el('message').textContent='終了しました。未回答の名前を表示しています。';
+});
+setInterval(()=>{
+ if(ended)return;const sec=Math.floor((Date.now()-started)/1000);
+ el('clock').textContent=String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0');
+},1000);
+update();
+</script></body></html>
