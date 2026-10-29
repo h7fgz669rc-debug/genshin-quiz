@@ -1,0 +1,245 @@
+
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>原神 全キャラ言えるかな？ テスト</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;background:#e9f0ed;color:#273a45;
+  font-family:-apple-system,BlinkMacSystemFont,
+  "Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif
+}
+main{max-width:780px;margin:auto;padding:16px 12px 50px}
+h1{font-size:clamp(21px,5vw,30px);text-align:center;margin:12px 0 6px}
+.note{text-align:center;font-size:12px;color:#53646c;margin:0 0 16px}
+.toolbar{
+  background:#fff;border:1px solid #c7d3d1;border-radius:12px;
+  padding:12px;position:sticky;top:0;z-index:2
+}
+.stats{
+  display:flex;justify-content:space-between;gap:8px;
+  flex-wrap:wrap;font-size:13px;font-weight:700;margin-bottom:9px
+}
+.answer{display:flex;gap:6px}
+input{
+  min-width:0;flex:1;padding:11px;font-size:16px;
+  border:1px solid #aebfbd;border-radius:7px
+}
+button{
+  font:inherit;font-weight:700;padding:10px;border:0;
+  border-radius:7px;background:#356e7d;color:#fff
+}
+button.secondary{
+  background:#fff;color:#6b4845;border:1px solid #bda49f;
+  margin-top:10px;font-size:12px;padding:7px 10px
+}
+button:disabled,input:disabled{opacity:.6}
+#message{font-size:13px;min-height:19px;margin-top:8px;color:#4b5960}
+.tiles{
+  display:grid;grid-template-columns:repeat(6,minmax(0,1fr));
+  gap:7px;margin-top:16px
+}
+.tile{
+  aspect-ratio:1/1.1;background:#293a4d;
+  border:4px solid var(--element);border-radius:5px;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;color:#fff
+}
+.num{
+  position:absolute;top:3px;left:3px;
+  font-size:9px;color:#cfd8e1
+}
+.question{font-size:28px;font-weight:600}
+.name{
+  display:none;text-align:center;
+  font-size:clamp(10px,2.8vw,16px);
+  font-weight:750;overflow-wrap:anywhere;padding:3px
+}
+.tile.done{background:#fff9e9;color:#304854}
+.tile.done .question,.tile.revealed .question{display:none}
+.tile.done .name,.tile.revealed .name{display:block}
+.tile.revealed{background:#d4d9db;color:#3f4d56}
+.legend{
+  display:flex;flex-wrap:wrap;gap:6px 12px;
+  margin-top:13px;font-size:11px;color:#52636b
+}
+.dot{
+  display:inline-block;width:9px;height:9px;
+  border-radius:50%;margin-right:3px
+}
+.footer{font-size:11px;color:#68777b;margin-top:18px}
+@media(min-width:600px){
+  .tiles{grid-template-columns:repeat(10,minmax(0,1fr))}
+}
+</style>
+</head>
+<body>
+<main>
+<h1>原神 全キャラ言えるかな？</h1>
+<p class="note">動作確認版・旅人を除くプレイアブルキャラの一部のみ収録</p>
+
+<div class="toolbar">
+  <div class="stats">
+    <span id="count">正解 0 / 8</span>
+    <span id="clock">00:00</span>
+    <span id="remaining">残り 8</span>
+  </div>
+  <form id="form" class="answer">
+    <input id="input" placeholder="キャラクター名を入力"
+      autocomplete="off" aria-label="キャラクター名">
+    <button id="submit" type="submit">回答</button>
+  </form>
+  <div id="message" aria-live="polite">
+    名前または正しいひらがなで回答してね。
+  </div>
+  <button class="secondary" id="giveup" type="button">
+    ギブアップ
+  </button>
+</div>
+
+<div id="tiles" class="tiles"></div>
+<div class="legend" id="legend"></div>
+<div class="footer">
+  ※これは動作テスト用の8キャラ版です。
+  正式な全キャラ版ではありません。
+</div>
+</main>
+
+<script>
+'use strict';
+
+const elements={
+  炎:'#e36d50',
+  水:'#4aa5db',
+  風:'#4ebba5',
+  雷:'#aa78df',
+  草:'#87b85c',
+  氷:'#79c8d8',
+  岩:'#d3ad57'
+};
+
+const characters=[
+  {name:'煙緋',reading:'えんひ',element:'炎'},
+  {name:'胡桃',reading:'ふーたお',element:'炎'},
+  {name:'タルタリヤ',reading:'たるたりや',element:'水'},
+  {name:'楓原万葉',reading:'かえではらかずは',element:'風'},
+  {name:'雷電将軍',reading:'らいでんしょうぐん',element:'雷'},
+  {name:'ナヒーダ',reading:'なひーだ',element:'草'},
+  {name:'神里綾華',reading:'かみさとあやか',element:'氷'},
+  {name:'鍾離',reading:'しょうり',element:'岩'}
+];
+
+const $=id=>document.getElementById(id);
+const solved=new Set();
+let ended=false;
+let started=Date.now();
+
+const normalize=s=>s.normalize('NFKC')
+  .trim().replace(/\s+/g,'').toLowerCase();
+
+const tiles=$('tiles');
+
+characters.forEach((c,i)=>{
+  const div=document.createElement('div');
+  div.className='tile';
+  div.style.setProperty('--element',elements[c.element]);
+  div.innerHTML=
+    '<span class="num">'+String(i+1).padStart(3,'0')+'</span>'+
+    '<span class="question">?</span>'+
+    '<span class="name"></span>';
+  div.querySelector('.name').textContent=c.name;
+  tiles.appendChild(div);
+});
+
+$('legend').innerHTML=Object.entries(elements)
+  .map(([e,color])=>
+    '<span><i class="dot" style="background:'+
+    color+'"></i>'+e+'</span>'
+  ).join('');
+
+function update(){
+  $('count').textContent=
+    '正解 '+solved.size+' / '+characters.length;
+  $('remaining').textContent=
+    '残り '+(characters.length-solved.size);
+}
+
+function finish(){
+  ended=true;
+  $('input').disabled=true;
+  $('submit').disabled=true;
+  $('giveup').disabled=true;
+}
+
+$('form').addEventListener('submit',event=>{
+  event.preventDefault();
+  if(ended)return;
+
+  const answer=normalize($('input').value);
+  if(!answer)return;
+
+  const index=characters.findIndex(c=>
+    normalize(c.name)===answer ||
+    normalize(c.reading)===answer
+  );
+
+  if(index===-1){
+    $('message').textContent=
+      '未登録または不正解：'+$('input').value;
+    return;
+  }
+
+  if(solved.has(index)){
+    $('message').textContent='そのキャラは回答済み！';
+    $('input').value='';
+    return;
+  }
+
+  solved.add(index);
+  tiles.children[index].classList.add('done');
+  $('message').textContent=
+    '正解！ '+characters[index].name;
+  $('input').value='';
+  update();
+
+  if(solved.size===characters.length){
+    finish();
+    $('message').textContent='全問正解！ おめでとう！';
+  }
+});
+
+$('giveup').addEventListener('click',()=>{
+  if(ended)return;
+
+  if(!confirm('ギブアップして未回答のキャラを表示しますか？')){
+    return;
+  }
+
+  characters.forEach((c,i)=>{
+    if(!solved.has(i)){
+      tiles.children[i].classList.add('revealed');
+    }
+  });
+
+  finish();
+  $('message').textContent=
+    '終了！ 未回答のキャラを表示しました。';
+});
+
+setInterval(()=>{
+  if(ended)return;
+
+  const sec=Math.floor((Date.now()-started)/1000);
+  $('clock').textContent=
+    String(Math.floor(sec/60)).padStart(2,'0')+
+    ':'+
+    String(sec%60).padStart(2,'0');
+},1000);
+
+update();
+</script>
+</body>
+</html>
